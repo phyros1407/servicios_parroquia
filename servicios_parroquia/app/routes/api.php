@@ -75,7 +75,7 @@
   });
 
 
-  $app->get("/parroquia", function() use ($app){
+  $app->get("/parroquia/", function() use ($app){
 
     try {
 
@@ -106,6 +106,48 @@
 
 
   });
+
+
+
+  $app->get("/horarios_misa", function() use ($app){
+
+    try {
+
+      $id_parroquia = $_GET['id_parroquia'];
+      $id_dia = $_GET['id_dia'];
+
+
+      $query = " SELECT distinct(id) id,id_dia,date_format(inicio_misa,'%H:%i') as inicio_misa,date_format(fin_misa,'%H:%i') as fin_misa,id_parroquia "
+              ." FROM bd_miparroquia.t_misa_horario"
+              ." where id_parroquia=" . $id_parroquia . " and id_dia=". $id_dia
+              ." order by inicio_misa" ;
+
+      $connection = getConnection();
+
+      $recordSet = $connection->query($query)->fetchALL(PDO::FETCH_ASSOC);
+
+      $connection = null;
+
+      $listadoEventos = array();
+
+      foreach ($recordSet as $row ) {
+        $listadoEventos[] = $row;
+      }
+
+      $app->response->headers->set("Content-type","application/json");
+      $app->response->status(200);
+      $app->response->body(json_encode($listadoEventos));
+
+    } catch (PDOException $e) {
+
+      echo "Error : -->>" . $e ->getMessage();
+
+    }
+
+
+  });
+
+
 
   $app->post("/user_access", function() use ($app){
 
